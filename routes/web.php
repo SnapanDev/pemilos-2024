@@ -50,3 +50,12 @@ Route::middleware('auth')->group(function () {
             ->name('votes.index');
     });
 });
+
+Route::get('/coba', function () {
+    $payload = [
+        "message" => "ini datanya"
+    ];
+    event(new \App\Events\UserVoteEvent(json_encode($payload)));
+
+    return \Illuminate\Support\Facades\Redirect::to('/');
+});
