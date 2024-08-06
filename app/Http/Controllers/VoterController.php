@@ -83,6 +83,8 @@ class VoterController extends Controller
             ]
         ]);
 
+        event(new \App\Events\UserVoteEvent());
+
         return redirect()->route('logout');
     }
 
