@@ -16,20 +16,17 @@ class UserVoteEvent Implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
 
-    public function __construct(
-        public $data
-    )
+    public function __construct()
     {
-        $this->data = $data;
     }
 
     public function broadcastOn(): array
     {
-        return ['my-channel'];
+        return ['vote'];
     }
 
     public function broadcastAs(): string
     {
-        return 'my-event';
+        return 'user-vote';
     }
 }
