@@ -225,8 +225,6 @@ class UserController extends Controller
 
                 if ($item === false) return;
 
-                Log::info($item);
-
                 $password = Str::password(10, symbols: false);
 
                 User::query()->create([

@@ -9,6 +9,8 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\VoterController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/live/{label}/quick-count', [VoterController::class, 'liveVotes']);
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'login'])
         ->name('login');
@@ -49,13 +51,4 @@ Route::middleware('auth')->group(function () {
         Route::get('/votes', [VoteController::class, 'index'])
             ->name('votes.index');
     });
-});
-
-Route::get('/coba', function () {
-    $payload = [
-        "message" => "ini datanya"
-    ];
-    event(new \App\Events\UserVoteEvent(json_encode($payload)));
-
-    return \Illuminate\Support\Facades\Redirect::to('/');
 });

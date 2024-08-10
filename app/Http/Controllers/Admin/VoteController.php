@@ -43,7 +43,7 @@ class VoteController extends Controller
         return view('admin.votes.index', compact('users', 'notYetVoting'));
     }
 
-    public function liveCount(): JsonResponse
+    public function votesCount(): JsonResponse
     {
         $candidates = Candidate::query()
             ->select('name', 'label', 'number')
