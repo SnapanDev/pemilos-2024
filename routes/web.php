@@ -41,10 +41,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/users/create-csv', [UserController::class, 'store_csv'])->name('users.csv-store');
         Route::get('/update-password', [UserController::class, 'updatePassword']);
 
-        Route::name('users.export')->group(function () {
-            Route::get('/users/export', [UserController::class, 'export']);
-            Route::post('/users/export', [UserController::class, 'export_download']);
-        });
+        Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
+        Route::post('/users/export', [UserController::class, 'export_download'])->name('users.export-download');
 
         Route::resource('/candidates', CandidateController::class)->except('show');
 
