@@ -10,9 +10,19 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class VoterController extends Controller
 {
+    public function __construct()
+    {
+        $this->logger = Log::build([
+            "driver" => "single",
+            "path" => storage_path('logs/app.log'),
+        ]);
+    }
+
     public function home(): View
     {
         return view('voter.home');
@@ -83,7 +93,13 @@ class VoterController extends Controller
             ]
         ]);
 
-        event(new \App\Events\UserVoteEvent());
+        event(new UserVoteEvent());
+
+        $this->logger->info("User Vote", [
+            "id" => Auth::user()->uuid,
+            "voted_osis" => $osis->name,
+            "voted_mpk" => $mpk->name,
+        ]);
 
         return redirect()->route('logout');
     }
