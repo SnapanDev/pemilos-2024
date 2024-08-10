@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chart OSIS</title>
     @vite('resources/css/app.css')
-    @vite('resource/js/app.js')
+    @vite('resources/js/app.js')
 </head>
 <script>
     const initData = {
