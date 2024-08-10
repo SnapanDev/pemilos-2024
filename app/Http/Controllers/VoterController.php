@@ -2,17 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UserVoteEvent;
 use App\Models\Candidate;
 use App\Models\Setting;
 use App\Models\User;
-use App\Models\Vote;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class VoterController extends Controller
 {
+    public function __construct()
+    {
+        $this->logger = Log::build([
+            "driver" => "single",
+            "path" => storage_path('logs/app.log'),
+        ]);
+    }
+
     public function home(): View
     {
         return view('voter.home');
@@ -32,8 +43,8 @@ class VoterController extends Controller
             return view('voter.cannot-vote');
         }
 
-        if (sizeof(auth()->user()->votes) === 2) {
-            return redirect()->route('logout');
+        if (sizeof(auth()->user()->votes) > 0) {
+            return redirect()->to('/logout');
         }
 
         $labels = Candidate::query()
@@ -50,7 +61,7 @@ class VoterController extends Controller
     {
         abort_if(
             in_array(auth()->user()->role_id, [User::ADMIN, User::SUPER_ADMIN])
-            || sizeof(auth()->user()->votes) === 2,
+            || sizeof(auth()->user()->votes) > 0,
             403
         );
 
@@ -83,7 +94,13 @@ class VoterController extends Controller
             ]
         ]);
 
-        event(new \App\Events\UserVoteEvent());
+        event(new UserVoteEvent());
+
+        $this->logger->info("User Vote", [
+            "id" => Auth::user()->uuid,
+            "voted_osis" => $osis->name,
+            "voted_mpk" => $mpk->name,
+        ]);
 
         return redirect()->route('logout');
     }
@@ -92,10 +109,28 @@ class VoterController extends Controller
     {
         abort_if(in_array(auth()->user()->role_id, [User::ADMIN, User::SUPER_ADMIN]), 403);
 
-        if (sizeof(auth()->user()->votes) !== 2) {
+        if (sizeof(auth()->user()->votes) === 0) {
             return redirect()->route('vote');
         }
 
         return view('voter.logout');
+    }
+
+    public function liveVotes(string $label): View
+    {
+        if ($label !== "mpk" && $label !== "osis") {
+            throw new NotFoundHttpException();
+        }
+
+        $candidates = Candidate::query()
+            ->select('name', 'label', 'number')
+            ->withCount('votes')
+            ->orderBy('number')
+            ->get();
+
+        $osis = $candidates->where('label', 'OSIS');
+        $mpk = $candidates->where('label', 'MPK');
+
+        return view('chart', compact('osis', 'mpk', 'label'));
     }
 }

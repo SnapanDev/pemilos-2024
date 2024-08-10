@@ -216,7 +216,7 @@ class UserController extends Controller
         fclose($read);
         Storage::delete('app/csv-file/mock.csv');
 
-        $data->shift();
+        $data->shift(2);
 
         try {
             DB::beginTransaction();
@@ -238,7 +238,8 @@ class UserController extends Controller
             });
 
             DB::commit();
-        } catch (Exception) {
+        } catch (Exception $e) {
+            Log::error($e);
             DB::rollBack();
             return redirect(route('admin.users.index'))
                 ->withErrors([
