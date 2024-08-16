@@ -60,9 +60,7 @@ class VoterController extends Controller
     public function submit(Request $request): RedirectResponse
     {
         abort_if(
-            in_array(auth()->user()->role_id, [User::ADMIN, User::SUPER_ADMIN])
-            || sizeof(auth()->user()->votes) > 0,
-            403
+            in_array(auth()->user()->role_id, [User::ADMIN, User::SUPER_ADMIN]), 403
         );
 
         $canVote = Cache::remember('canVote', 5, fn() => Setting::query()->where('attribute', 'vote')->first());
